@@ -1,0 +1,494 @@
+{
+  "name": "people extarction flow",
+  "nodes": [
+    {
+      "parameters": {
+        "conditions": {
+          "options": {
+            "caseSensitive": true,
+            "leftValue": "",
+            "typeValidation": "strict",
+            "version": 2
+          },
+          "conditions": [
+            {
+              "id": "01e146e1-44b4-46df-9e47-56672481b996",
+              "leftValue": "={{ $json.company_website }}",
+              "rightValue": "",
+              "operator": {
+                "type": "string",
+                "operation": "notEmpty",
+                "singleValue": true
+              }
+            },
+            {
+              "id": "129937a1-6174-47ea-923d-4c1e09955ade",
+              "leftValue": "",
+              "rightValue": "",
+              "operator": {
+                "type": "string",
+                "operation": "equals",
+                "name": "filter.operator.equals"
+              }
+            }
+          ],
+          "combinator": "and"
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.if",
+      "typeVersion": 2.2,
+      "position": [
+        384,
+        -64
+      ],
+      "id": "5b9ff3e4-98ff-49bc-ac70-d47ace95ac07",
+      "name": "If1"
+    },
+    {
+      "parameters": {},
+      "type": "n8n-nodes-base.manualTrigger",
+      "typeVersion": 1,
+      "position": [
+        240,
+        160
+      ],
+      "id": "1f61e7fd-e093-4777-b923-3470e0dc8f7f",
+      "name": "When clicking ‘Execute workflow’"
+    },
+    {
+      "parameters": {
+        "operation": "appendOrUpdate",
+        "documentId": {
+          "__rl": true,
+          "value": "1hTTx3gi_l71hLeaXHnbZJkk3HDtTezQcXfq8lX4Ms34",
+          "mode": "list",
+          "cachedResultName": "Carbon Unbound",
+          "cachedResultUrl": "https://docs.google.com/spreadsheets/d/<REDACTED_SHEET_ID>/edit?usp=drivesdk"
+        },
+        "sheetName": {
+          "__rl": true,
+          "value": 122053940,
+          "mode": "list",
+          "cachedResultName": "people",
+          "cachedResultUrl": "https://docs.google.com/spreadsheets/d/<REDACTED_SHEET_ID>/edit#gid=122053940"
+        },
+        "columns": {
+          "mappingMode": "autoMapInputData",
+          "value": {},
+          "matchingColumns": [],
+          "schema": [],
+          "attemptToConvertTypes": false,
+          "convertFieldsToString": false
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.googleSheets",
+      "typeVersion": 4.7,
+      "position": [
+        2016,
+        176
+      ],
+      "id": "f8f47e7c-ccbd-45f0-810e-8607c6653656",
+      "name": "Append or update row in sheet3",
+      "credentials": {
+        "googleSheetsOAuth2Api": {
+          "id": "<REDACTED_CREDENTIAL_ID>", "name": "<REDACTED_CREDENTIAL_NAME>"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "documentId": {
+          "__rl": true,
+          "value": "1hTTx3gi_l71hLeaXHnbZJkk3HDtTezQcXfq8lX4Ms34",
+          "mode": "list",
+          "cachedResultName": "Carbon Unbound",
+          "cachedResultUrl": "https://docs.google.com/spreadsheets/d/<REDACTED_SHEET_ID>/edit?usp=drivesdk"
+        },
+        "sheetName": {
+          "__rl": true,
+          "value": "gid=0",
+          "mode": "list",
+          "cachedResultName": "Sheet1",
+          "cachedResultUrl": "https://docs.google.com/spreadsheets/d/<REDACTED_SHEET_ID>/edit#gid=0"
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.googleSheets",
+      "typeVersion": 4.7,
+      "position": [
+        448,
+        160
+      ],
+      "id": "ef281dd1-f47d-4a8b-a24c-8d0431ec17e2",
+      "name": "Get row(s) in sheet",
+      "credentials": {
+        "googleSheetsOAuth2Api": {
+          "id": "<REDACTED_CREDENTIAL_ID>", "name": "<REDACTED_CREDENTIAL_NAME>"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "assignments": {
+          "assignments": [
+            {
+              "id": "f77aca26-85e8-4ecb-b7d9-d28feb649678",
+              "name": "people",
+              "value": "={{ $json.people }}",
+              "type": "string"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.set",
+      "typeVersion": 3.4,
+      "position": [
+        1584,
+        176
+      ],
+      "id": "b2066a11-80d7-4a04-86ee-debb3afe791c",
+      "name": "Edit Fields1"
+    },
+    {
+      "parameters": {
+        "jsCode": "// n8n Code Node to extract specific fields from people data\nconst cleanedData = [];\n\n// Process each item from the input\nfor (const inputItem of $input.all()) {\n  const peopleData = inputItem.json.people;\n  \n  // Check if people data exists and is a string (JSON)\n  if (peopleData && typeof peopleData === 'string') {\n    try {\n      const parsedPeople = JSON.parse(peopleData);\n      \n      // Process each person in the array\n      parsedPeople.forEach(person => {\n        // Extract only the specified fields\n        const cleanedPerson = {\n          id: person.id || null,\n          name: person.name || null,\n          first_name: person.first_name || null,\n          last_name: person.last_name || null,\n          title: person.title || null,\n          linkedin_url: person.linkedin_url || null,\n          country: person. country || null,\n          company_name: person.organization?.name || null,\n          company_linkedin: person.organization?.linkedin_url || null,\n          company_website: person.organization?.website_url || null\n        };\n        \n        cleanedData.push(cleanedPerson);\n      });\n      \n    } catch (error) {\n      console.error('Error parsing people data:', error);\n    }\n  }\n}\n\n// Return the cleaned data\nreturn cleanedData.map(person => ({ json: person }));"
+      },
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        1792,
+        176
+      ],
+      "id": "d714940d-7bc9-4a82-800f-7cc3aedd1783",
+      "name": "data cleaning1"
+    },
+    {
+      "parameters": {
+        "method": "POST",
+        "url": "={{ $json.url }}",
+        "authentication": "genericCredentialType",
+        "genericAuthType": "httpHeaderAuth",
+        "sendBody": true,
+        "specifyBody": "json",
+        "jsonBody": "={{ $json.body }}",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.2,
+      "position": [
+        1376,
+        176
+      ],
+      "id": "f22f7e46-6ea7-4a82-b95c-2a2ea6ae50c6",
+      "name": "Apollo People Search",
+      "credentials": {
+        "httpHeaderAuth": {
+          "id": "<REDACTED_CREDENTIAL_ID>", "name": "<REDACTED_CREDENTIAL_NAME>"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "jsCode": "// n8n Code node — Build Apollo Mixed People Search POST body (USA + Europe)\n// Target: Sustainability/ESG/Climate/Carbon Leadership\n// Director, Senior Manager, VP, Head, CSO/CXO level\n\n// 1) Inputs\nconst items = $input.all();\n\n// 2) Extract domains from company_website field\nconst allDomains = Array.from(new Set(\n  items\n    .map(it => {\n      const website = String(it.json?.company_website || '').trim();\n      if (!website) return '';\n      \n      // Extract domain from URL\n      try {\n        const url = new URL(website);\n        return url.hostname.replace(/^www\\./, ''); // Remove www. prefix\n      } catch (e) {\n        // If URL parsing fails, try manual extraction\n        return website\n          .replace(/^https?:\\/\\//i, '') // Remove protocol\n          .replace(/^www\\./, '')         // Remove www.\n          .split('/')[0]                 // Get domain only\n          .trim();\n      }\n    })\n    .filter(d => d && d.includes('.'))\n));\n\n// Guard\nif (allDomains.length === 0) {\n  return [{ json: { error: 'No valid domains found' } }];\n}\n\n// 3) Sustainability/ESG/Climate/Carbon Leadership Titles\nconst titles = [\n  // C-Suite / Chief Officers\n  'Chief Sustainability Officer',\n  'CSO',\n  'Chief Environmental Officer',\n  'Chief ESG Officer',\n  'Chief Climate Officer',\n  \n  // VP Level\n  'Vice President of Sustainability',\n  'VP of Sustainability',\n  'VP Sustainability',\n  'Vice President of ESG',\n  'VP of ESG',\n  'VP ESG',\n  'Vice President of Climate',\n  'VP of Climate',\n  'Vice President Environmental',\n  'VP Environmental',\n  \n  // Head Level\n  'Head of Sustainability',\n  'Head of ESG',\n  'Head of Climate',\n  'Head of Environmental',\n  'Head of Carbon',\n  'Sustainability Head',\n  'ESG Head',\n  'Climate Head',\n  \n  // Director Level\n  'Director of Sustainability',\n  'Sustainability Director',\n  'Director of ESG',\n  'ESG Director',\n  'Director of Climate',\n  'Climate Director',\n  'Director of Environmental',\n  'Environmental Director',\n  'Director of Carbon',\n  'Carbon Director',\n  \n  // Senior Manager Level\n  'Senior Manager Sustainability',\n  'Senior Sustainability Manager',\n  'Senior Manager ESG',\n  'Senior ESG Manager',\n  'Senior Manager Climate',\n  'Senior Climate Manager',\n  'Senior Manager Environmental',\n  'Senior Manager Carbon'\n];\n\n// 4) Build POST body for mixed_people/search (USA + Europe filter)\nconst body = {\n  person_titles: titles,\n  person_current_titles: titles,\n  q_organization_domains_list: allDomains,\n  person_locations: ['United States', 'Europe'],  // <-- USA + Europe filter\n  page: 1,\n  per_page: 10\n};\n\n// 5) Output for HTTP Request node\nreturn [{\n  json: {\n    url: 'https://api.apollo.io/api/v1/mixed_people/search',\n    method: 'POST',\n    body,\n    processedDomainCount: allDomains.length,\n    processedDomains: allDomains,\n    targetTitles: titles.length,\n    locationFilter: 'United States, Europe',\n    targetICP: 'Sustainability/ESG/Climate/Carbon Leaders'\n  }\n}];"
+      },
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        1136,
+        176
+      ],
+      "id": "dc3c5abc-2e50-4736-9343-7593249623b0",
+      "name": "Code5"
+    },
+    {
+      "parameters": {
+        "batchSize": 15,
+        "options": {}
+      },
+      "type": "n8n-nodes-base.splitInBatches",
+      "typeVersion": 3,
+      "position": [
+        784,
+        160
+      ],
+      "id": "90d73bdf-8a9f-49e5-8a57-5ff9a7034ad9",
+      "name": "Loop Over Items2"
+    },
+    {
+      "parameters": {},
+      "type": "n8n-nodes-base.wait",
+      "typeVersion": 1.1,
+      "position": [
+        992,
+        256
+      ],
+      "id": "a3e8dccf-0406-472a-9fe1-f3c32a9f499a",
+      "name": "Wait",
+      "webhookId": "<REDACTED_WEBHOOK_ID>"
+    },
+    {
+      "parameters": {
+        "url": "https://trellis.net/events/greenbiz/speakers/",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.3,
+      "position": [
+        992,
+        -176
+      ],
+      "id": "6d280b00-a772-428a-a770-7720a1bf0f78",
+      "name": "HTTP Request"
+    }
+  ],
+  "connections": {
+    "If1": {
+      "main": [
+        []
+      ]
+    },
+    "When clicking ‘Execute workflow’": {
+      "main": [
+        [
+          {
+            "node": "Get row(s) in sheet",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Get row(s) in sheet": {
+      "main": [
+        [
+          {
+            "node": "Loop Over Items2",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Edit Fields1": {
+      "main": [
+        [
+          {
+            "node": "data cleaning1",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "data cleaning1": {
+      "main": [
+        [
+          {
+            "node": "Append or update row in sheet3",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Apollo People Search": {
+      "main": [
+        [
+          {
+            "node": "Edit Fields1",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Code5": {
+      "main": [
+        [
+          {
+            "node": "Apollo People Search",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Loop Over Items2": {
+      "main": [
+        [],
+        [
+          {
+            "node": "Code5",
+            "type": "main",
+            "index": 0
+          },
+          {
+            "node": "Wait",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Wait": {
+      "main": [
+        [
+          {
+            "node": "Loop Over Items2",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "settings": {
+    "executionOrder": "v1"
+  },
+  "staticData": null,
+  "pinData": {
+    "Code5": [
+      {
+        "json": {
+          "url": "https://api.apollo.io/api/v1/mixed_people/search",
+          "method": "POST",
+          "body": {
+            "person_titles": [
+              "Chief Sustainability Officer",
+              "CSO",
+              "Chief Environmental Officer",
+              "Chief ESG Officer",
+              "Chief Climate Officer",
+              "Vice President of Sustainability",
+              "VP of Sustainability",
+              "VP Sustainability",
+              "Vice President of ESG",
+              "VP of ESG",
+              "VP ESG",
+              "Vice President of Climate",
+              "VP of Climate",
+              "Vice President Environmental",
+              "VP Environmental",
+              "Head of Sustainability",
+              "Head of ESG",
+              "Head of Climate",
+              "Head of Environmental",
+              "Head of Carbon",
+              "Sustainability Head",
+              "ESG Head",
+              "Climate Head",
+              "Director of Sustainability",
+              "Sustainability Director",
+              "Director of ESG",
+              "ESG Director",
+              "Director of Climate",
+              "Climate Director",
+              "Director of Environmental",
+              "Environmental Director",
+              "Director of Carbon",
+              "Carbon Director",
+              "Senior Manager Sustainability",
+              "Senior Sustainability Manager",
+              "Senior Manager ESG",
+              "Senior ESG Manager",
+              "Senior Manager Climate",
+              "Senior Climate Manager",
+              "Senior Manager Environmental",
+              "Senior Manager Carbon"
+            ],
+            "person_current_titles": [
+              "Chief Sustainability Officer",
+              "CSO",
+              "Chief Environmental Officer",
+              "Chief ESG Officer",
+              "Chief Climate Officer",
+              "Vice President of Sustainability",
+              "VP of Sustainability",
+              "VP Sustainability",
+              "Vice President of ESG",
+              "VP of ESG",
+              "VP ESG",
+              "Vice President of Climate",
+              "VP of Climate",
+              "Vice President Environmental",
+              "VP Environmental",
+              "Head of Sustainability",
+              "Head of ESG",
+              "Head of Climate",
+              "Head of Environmental",
+              "Head of Carbon",
+              "Sustainability Head",
+              "ESG Head",
+              "Climate Head",
+              "Director of Sustainability",
+              "Sustainability Director",
+              "Director of ESG",
+              "ESG Director",
+              "Director of Climate",
+              "Climate Director",
+              "Director of Environmental",
+              "Environmental Director",
+              "Director of Carbon",
+              "Carbon Director",
+              "Senior Manager Sustainability",
+              "Senior Sustainability Manager",
+              "Senior Manager ESG",
+              "Senior ESG Manager",
+              "Senior Manager Climate",
+              "Senior Climate Manager",
+              "Senior Manager Environmental",
+              "Senior Manager Carbon"
+            ],
+            "q_organization_domains_list": [
+              "climefi.com",
+              "klarna.com",
+              "ihcuae.com",
+              "orbitalindustries.com",
+              "stripe.com",
+              "standardchartered.com",
+              "hsbc.com",
+              "angloamerican.com",
+              "arup.com",
+              "capgemini.com",
+              "jpmorgan.com",
+              "lloydsbankinggroup.com",
+              "siemens.com"
+            ],
+            "person_locations": [
+              "United States",
+              "Europe"
+            ],
+            "page": 1,
+            "per_page": 10
+          },
+          "processedDomainCount": 13,
+          "processedDomains": [
+            "climefi.com",
+            "klarna.com",
+            "ihcuae.com",
+            "orbitalindustries.com",
+            "stripe.com",
+            "standardchartered.com",
+            "hsbc.com",
+            "angloamerican.com",
+            "arup.com",
+            "capgemini.com",
+            "jpmorgan.com",
+            "lloydsbankinggroup.com",
+            "siemens.com"
+          ],
+          "targetTitles": 41,
+          "locationFilter": "United States, Europe",
+          "targetICP": "Sustainability/ESG/Climate/Carbon Leaders"
+        }
+      }
+    ]
+  },
+  "triggerCount": 0,
+  "meta": {
+    "templateCredsSetupCompleted": true
+  }
+}
